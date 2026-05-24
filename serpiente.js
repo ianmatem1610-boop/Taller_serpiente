@@ -46,7 +46,7 @@ dibujarTodo();
 function moverDerecha() {
   const cabeza = serpiente[0];
   const nuevaCabeza = { x: cabeza.x + 1, y: cabeza.y };
-  if (validarColisionBordes(nuevaCabeza)) return; // Valida antes de mover
+  if (validarColisionBordes(nuevaCabeza) || validarColisionCuerpo(nuevaCabeza)) return;
   serpiente.unshift(nuevaCabeza);
   procesarAvanzado();
 }
@@ -54,7 +54,7 @@ function moverDerecha() {
 function moverIzquierda() {
   const cabeza = serpiente[0];
   const nuevaCabeza = { x: cabeza.x - 1, y: cabeza.y };
-  if (validarColisionBordes(nuevaCabeza)) return;
+  if (validarColisionBordes(nuevaCabeza) || validarColisionCuerpo(nuevaCabeza)) return;
   serpiente.unshift(nuevaCabeza);
   procesarAvanzado();
 }
@@ -62,7 +62,7 @@ function moverIzquierda() {
 function moverArriba() {
   const cabeza = serpiente[0];
   const nuevaCabeza = { x: cabeza.x, y: cabeza.y - 1 };
-  if (validarColisionBordes(nuevaCabeza)) return;
+  if (validarColisionBordes(nuevaCabeza) || validarColisionCuerpo(nuevaCabeza)) return;
   serpiente.unshift(nuevaCabeza);
   procesarAvanzado();
 }
@@ -70,7 +70,7 @@ function moverArriba() {
 function moverAbajo() {
   const cabeza = serpiente[0];
   const nuevaCabeza = { x: cabeza.x, y: cabeza.y + 1 };
-  if (validarColisionBordes(nuevaCabeza)) return;
+  if (validarColisionBordes(nuevaCabeza) || validarColisionCuerpo(nuevaCabeza)) return;
   serpiente.unshift(nuevaCabeza);
   procesarAvanzado();
 }
@@ -93,6 +93,16 @@ function validarColisionBordes(cabezaEvaluada) {
   return false;
 }
 
+
+function validarColisionCuerpo(cabezaEvaluada) {
+  for (let i = 1; i < serpiente.length; i++) {
+    if (cabezaEvaluada.x === serpiente[i].x && cabezaEvaluada.y === serpiente[i].y) {
+      ejecutarGameOver("¡GAME OVER! Has chocado contra tu propio cuerpo.");
+      return true;
+    }
+  }
+  return false;
+}
 /** Detiene el juego y despliega el mensaje de GAME OVER en la pantalla*/
 function ejecutarGameOver() {
   pausarJuego();
@@ -133,7 +143,8 @@ function reiniciarIntervaloVelocidad() {
 // ====================================
 
 function cambiarDireccion(nuevaDireccion) {
-  if (juegoTerminado) return; // Si el juego terminó (no permite cambiar direcció)
+  if (juegoTerminado) return;
+  // Si el juego terminó (no permite cambiar direcció)
   // Evitamos que la serpiente retroceda sobre sí misma (Mejora clásica de control)
   if (nuevaDireccion === "derecha" && direccionActual !== "izquierda") direccionActual = "derecha";
   if (nuevaDireccion === "izquierda" && direccionActual !== "derecha") direccionActual = "izquierda";
@@ -221,10 +232,10 @@ function generarComidaAleatoria() {
 
   comida.x = Math.floor(Math.random() * maxLineasX);
   comida.y = Math.floor(Math.random() * maxLineasY);
-// se evita que la comida aparezca encima del cuerpo de la serpiente
+  // se evita que la comida aparezca encima del cuerpo de la serpiente
   for (let i = 0; i < serpiente.length; i++) {
     if (serpiente[i].x === comida.x && serpiente[i].y === comida.y) {
-      generarComidaAleatoria(); 
+      generarComidaAleatoria();
       break;
     }
   }
